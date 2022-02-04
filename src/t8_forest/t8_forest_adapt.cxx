@@ -70,7 +70,7 @@ t8_forest_adapt_coarsen_recursive (t8_forest_t forest, t8_locidx_t ltreeid,
 
   T8_ASSERT (ts->t8_element_level (element) > 0);
 
-  num_siblings = ts->t8_element_num_siblings(element);
+  num_siblings = ts->t8_element_num_siblings (element);
   //T8_ASSERT (ts->t8_element_child_id (element) == num_children - 1);
 
   fam = el_buffer;
@@ -239,6 +239,9 @@ t8_forest_adapt (t8_forest_t forest)
   forest->local_num_elements = 0;
   el_offset = 0;
   num_trees = t8_forest_get_num_local_trees (forest);
+  double              sibling_time = 0;
+  double              parent_time = 0;
+  double              child_id_time = 0;
   /* Iterate over the trees and build the new element arrays for each one. */
   for (ltree_id = 0; ltree_id < num_trees; ltree_id++) {
     /* Get the new and old tree and the new and old element arrays */
@@ -263,9 +266,12 @@ t8_forest_adapt (t8_forest_t forest)
       tscheme->t8_element_num_children (t8_element_array_index_locidx
                                         (telements_from, 0));
     curr_size_elements = num_children;
+    sibling_time -= sc_MPI_Wtime ();
     curr_size_elements_from =
       tscheme->t8_element_num_siblings (t8_element_array_index_locidx
                                         (telements_from, 0));
+    sibling_time += sc_MPI_Wtime ();
+
     /* Buffer for a family of new elements */
     elements = T8_ALLOC (t8_element_t *, num_children);
     /* Buffer for a family of old elements */
@@ -284,9 +290,11 @@ t8_forest_adapt (t8_forest_t forest)
        * At the end is_family will be true, if these elements form a family.
        */
 
+      sibling_time -= sc_MPI_Wtime ();
       num_siblings =
         tscheme->t8_element_num_siblings (t8_element_array_index_locidx
                                           (telements_from, el_considered));
+      sibling_time += sc_MPI_Wtime ();
 
       if (num_siblings > curr_size_elements_from) {
         elements_from =
@@ -305,9 +313,11 @@ t8_forest_adapt (t8_forest_t forest)
          * be part of a family (Since we can only have a family if child ids
          * are 0, 1, 2, ... zz, ... num_siblings-1).
          * This check is however not sufficient - therefore, we call is_family later. */
+        child_id_time -= sc_MPI_Wtime ();
         if ((size_t) tscheme->t8_element_child_id (elements_from[zz]) != zz) {
           break;
         }
+        child_id_time -= sc_MPI_Wtime ();
       }
 
       if (zz != num_siblings
@@ -388,7 +398,9 @@ t8_forest_adapt (t8_forest_t forest)
         /* Compute the parent of the current family.
          * This parent is now inserted in telements. */
         T8_ASSERT (tscheme->t8_element_level (elements_from[0]) > 0);
+        parent_time -= sc_MPI_Wtime ();
         tscheme->t8_element_parent (elements_from[0], elements[0]);
+        parent_time += sc_MPI_Wtime ();
         el_inserted++;
         num_siblings = tscheme->t8_element_num_children (elements[0]);
         if(num_siblings > curr_size_elements){
@@ -419,7 +431,9 @@ t8_forest_adapt (t8_forest_t forest)
         T8_ASSERT (refine == 0);
         elements[0] = t8_element_array_push (telements);
         tscheme->t8_element_copy (elements_from[0], elements[0]);
+        sibling_time -= sc_MPI_Wtime ();
         num_siblings = tscheme->t8_element_num_siblings (elements[0]);
+        sibling_time += sc_MPI_Wtime ();
         el_inserted++;
         const int           child_id =
           tscheme->t8_element_child_id (elements[0]);
@@ -449,6 +463,10 @@ t8_forest_adapt (t8_forest_t forest)
     T8_FREE (elements);
     T8_FREE (elements_from);
   }
+
+  t8_productionf ("Runtimes parent, siblings, child_id: %f %f %f\n",
+                  parent_time, sibling_time, child_id_time);
+
   if (forest->set_adapt_recursive) {
     /* clean up */
     sc_list_destroy (refine_list);
