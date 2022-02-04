@@ -317,7 +317,7 @@ t8_forest_adapt (t8_forest_t forest)
         if ((size_t) tscheme->t8_element_child_id (elements_from[zz]) != zz) {
           break;
         }
-        child_id_time -= sc_MPI_Wtime ();
+        child_id_time += sc_MPI_Wtime ();
       }
 
       if (zz != num_siblings
