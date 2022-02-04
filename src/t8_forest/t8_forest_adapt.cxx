@@ -468,10 +468,6 @@ t8_forest_adapt (t8_forest_t forest)
     T8_FREE (elements_from);
   }
 
-  total_time += sc_MPI_Wtime ();
-
-  t8_productionf ("Runtimes parent, siblings, child_id, total: %g %g %g %g\n",
-                  parent_time, sibling_time, child_id_time, total_time);
 
   if (forest->set_adapt_recursive) {
     /* clean up */
@@ -494,6 +490,10 @@ t8_forest_adapt (t8_forest_t forest)
     t8_global_productionf ("End adapt %f %f\n", sc_MPI_Wtime (),
                            forest->profile->adapt_runtime);
   }
+  total_time += sc_MPI_Wtime ();
+
+  t8_productionf ("Runtimes parent, siblings, child_id, total: %g %g %g %g\n",
+                  parent_time, sibling_time, child_id_time, total_time);
 }
 
 /* A refinement callback function that works with a marker array.
