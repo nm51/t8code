@@ -97,7 +97,8 @@ t8_forest_adapt_coarsen_recursive (t8_forest_t forest, t8_locidx_t ltreeid,
     }
     if (isfamily
         && forest->set_adapt_fn (forest, forest->set_from, ltreeid,
-                                 lelement_id, ts, num_siblings, constfam) < 0) {
+                                 lelement_id, ts, num_siblings,
+                                 constfam) < 0) {
       /* Coarsen the element */
       *el_inserted -= num_siblings - 1;
       /* remove num_children - 1 elements from the array */
@@ -316,7 +317,7 @@ t8_forest_adapt (t8_forest_t forest)
          * be part of a family (Since we can only have a family if child ids
          * are 0, 1, 2, ... zz, ... num_siblings-1).
          * This check is however not sufficient - therefore, we call is_family later. */
-        
+
         if ((size_t) tscheme->t8_element_child_id (elements_from[zz]) != zz) {
           break;
         }
@@ -324,8 +325,8 @@ t8_forest_adapt (t8_forest_t forest)
       child_id_time += sc_MPI_Wtime ();
 
       if (zz != num_siblings
-          || !tscheme->
-          t8_element_is_family ((const t8_element_t **) elements_from)) {
+          || !tscheme->t8_element_is_family ((const t8_element_t **)
+                                             elements_from)) {
         /* We are certain that the elements do not form a family.
          * So we will only pass the first element to the adapt callback. */
         num_elements_to_adapt_fn = 1;
@@ -337,7 +338,9 @@ t8_forest_adapt (t8_forest_t forest)
         is_family = 1;
 #endif
       }
-      T8_ASSERT (!is_family || tscheme->t8_element_is_family ((const t8_element_t **)elements_from));
+      T8_ASSERT (!is_family
+                 || tscheme->t8_element_is_family ((const t8_element_t **)
+                                                   elements_from));
 
       /* Pass the element, or the family to the adapt callback.
        * The output will be > 0 if the element should be refined
@@ -347,7 +350,8 @@ t8_forest_adapt (t8_forest_t forest)
       refine =
         forest->set_adapt_fn (forest, forest->set_from, ltree_id,
                               el_considered, tscheme,
-                              num_elements_to_adapt_fn, (const t8_element_t **)elements_from);
+                              num_elements_to_adapt_fn,
+                              (const t8_element_t **) elements_from);
       T8_ASSERT (is_family || refine >= 0);
       if (refine > 0 && tscheme->t8_element_level (elements_from[0]) >=
           forest->maxlevel) {
@@ -407,9 +411,9 @@ t8_forest_adapt (t8_forest_t forest)
         parent_time += sc_MPI_Wtime ();
         el_inserted++;
         num_siblings = tscheme->t8_element_num_children (elements[0]);
-        if(num_siblings > curr_size_elements){
-            elements = T8_REALLOC(elements, t8_element_t *, num_siblings);
-            curr_size_elements = num_siblings;
+        if (num_siblings > curr_size_elements) {
+          elements = T8_REALLOC (elements, t8_element_t *, num_siblings);
+          curr_size_elements = num_siblings;
         }
         if (forest->set_adapt_recursive) {
           /* Adaptation is recursive.
@@ -467,7 +471,6 @@ t8_forest_adapt (t8_forest_t forest)
     T8_FREE (elements);
     T8_FREE (elements_from);
   }
-
 
   if (forest->set_adapt_recursive) {
     /* clean up */
