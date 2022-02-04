@@ -242,6 +242,8 @@ t8_forest_adapt (t8_forest_t forest)
   double              sibling_time = 0;
   double              parent_time = 0;
   double              child_id_time = 0;
+  double              total_time = 0;
+  total_time -= sc_MPI_Wtime ();
   /* Iterate over the trees and build the new element arrays for each one. */
   for (ltree_id = 0; ltree_id < num_trees; ltree_id++) {
     /* Get the new and old tree and the new and old element arrays */
@@ -466,8 +468,10 @@ t8_forest_adapt (t8_forest_t forest)
     T8_FREE (elements_from);
   }
 
-  t8_productionf ("Runtimes parent, siblings, child_id: %f %f %f\n",
-                  parent_time, sibling_time, child_id_time);
+  total_time += sc_MPI_Wtime ();
+
+  t8_productionf ("Runtimes parent, siblings, child_id, total: %g %g %g %g\n",
+                  parent_time, sibling_time, child_id_time, total_time);
 
   if (forest->set_adapt_recursive) {
     /* clean up */
