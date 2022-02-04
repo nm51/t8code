@@ -302,6 +302,7 @@ t8_forest_adapt (t8_forest_t forest)
         curr_size_elements_from = num_siblings;
       }
       /*change: num_children into num_siblings */
+      child_id_time -= sc_MPI_Wtime ();
       for (zz = 0; zz < (unsigned int) num_siblings &&
            el_considered + (t8_locidx_t) zz < num_el_from; zz++) {
         elements_from[zz] = t8_element_array_index_locidx (telements_from,
@@ -313,15 +314,16 @@ t8_forest_adapt (t8_forest_t forest)
          * be part of a family (Since we can only have a family if child ids
          * are 0, 1, 2, ... zz, ... num_siblings-1).
          * This check is however not sufficient - therefore, we call is_family later. */
-        child_id_time -= sc_MPI_Wtime ();
+        
         if ((size_t) tscheme->t8_element_child_id (elements_from[zz]) != zz) {
           break;
         }
-        child_id_time += sc_MPI_Wtime ();
       }
+      child_id_time += sc_MPI_Wtime ();
 
       if (zz != num_siblings
-          || !tscheme->t8_element_is_family ((const t8_element_t **)elements_from)) {
+          || !tscheme->
+          t8_element_is_family ((const t8_element_t **) elements_from)) {
         /* We are certain that the elements do not form a family.
          * So we will only pass the first element to the adapt callback. */
         num_elements_to_adapt_fn = 1;
