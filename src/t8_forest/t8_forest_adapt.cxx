@@ -477,6 +477,10 @@ t8_forest_adapt (t8_forest_t forest)
     sc_list_destroy (refine_list);
   }
 
+  total_time += sc_MPI_Wtime ();
+  t8_productionf ("Runtime total before comm:%g \n", total_time);
+  total_time -= sc_MPI_Wtime ();
+
   /* We now adapted all local trees */
   /* Compute the new global number of elements */
   t8_forest_comm_global_num_elements (forest);
