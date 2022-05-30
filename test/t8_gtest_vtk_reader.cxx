@@ -53,6 +53,9 @@ const char          t8_unstructured_support[2][4] = { "vtu", "vtk" };
 t8_cmesh_t
 t8_read_from_vtk (const char *filename, int file_type, sc_MPI_Comm comm)
 {
+/* Check if file exists. */
+  SC_CHECK_ABORTF (access (filename, R_OK) == 0, "Could not open file %s\n",
+                   filename);
   if (file_type < T8_POLY_SUPPORT) {
     return t8_cmesh_read_from_vtk_poly (filename, 1, 0, comm);
   }
@@ -69,12 +72,12 @@ protected:
         file_type = GetParam ();
         if(file_type < T8_POLY_SUPPORT)
         {
-            snprintf (filename, BUFSIZ, "/localdata1/knap_da/projects/t8code/t8code_debug/test/testfiles/vtk_reader/simple_test.%s", 
+            snprintf (filename, BUFSIZ, "test/testfiles/vtk_reader/simple_test.%s", 
                 t8_poly_support[file_type]);
         }
         else
         {
-            snprintf (filename, BUFSIZ, "/localdata1/knap_da/projects/t8code/t8code_debug/test/testfiles/vtk_reader/simple_test.%s", 
+            snprintf (filename, BUFSIZ, "test/testfiles/vtk_reader/simple_test.%s", 
                 t8_unstructured_support[file_type - T8_POLY_SUPPORT]);
         }
 #else
@@ -108,9 +111,23 @@ TEST_P(vtk_reader, compare_constructed)
     else{
         t8_cmesh_t          cmesh = t8_cmesh_new_hypercube_hybrid(sc_MPI_COMM_WORLD, 0, 0);
         t8_cmesh_t          cmesh_from_reader;
-        t8_cmesh_vtk_write_file(cmesh, "/localdata1/knap_da/projects/t8code/t8code_debug/test/testfiles/vtk_reader/hybrid", 1.0);
-        cmesh_from_reader = t8_read_from_vtk("/localdata1/knap_da/projects/t8code/t8code_debug/test/testfiles/vtk_reader/hybrid_0000.vtu", file_type, sc_MPI_COMM_WORLD);
-        EXPECT_TRUE(t8_cmesh_is_equal(cmesh, cmesh_from_reader));
+        t8_locidx_t         num_trees;
+        t8_locidx_t         itree;
+        t8_eclass_t         eclass;
+        t8_cmesh_vtk_write_file(cmesh, "test/testfiles/vtk_reader/hybrid", 1.0);
+        cmesh_from_reader = t8_read_from_vtk("test/testfiles/vtk_reader/hybrid_0000.vtu", file_type, sc_MPI_COMM_WORLD); 
+        num_trees = t8_cmesh_get_num_local_trees(cmesh);
+        EXPECT_EQ(num_trees, t8_cmesh_get_num_local_trees(cmesh_from_reader));
+        for(itree = 0; itree < num_trees; itree++){
+            eclass = t8_cmesh_get_tree_class(cmesh, itree);
+            EXPECT_EQ(eclass, t8_cmesh_get_tree_class(cmesh_from_reader, itree));
+        }
+
+        /* This test fails currently*/
+         EXPECT_TRUE(t8_cmesh_is_equal(cmesh, cmesh_from_reader));
+
+        t8_cmesh_destroy(&cmesh);
+        t8_cmesh_destroy(&cmesh_from_reader);
     }
     
 }
