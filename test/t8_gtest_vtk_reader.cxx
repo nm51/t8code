@@ -46,19 +46,19 @@ along with t8code; if not, write to the Free Software Foundation, Inc.,
 #define T8_VTU_TYPE 5
 #endif
 
-const char t8_poly_support[T8_POLY_SUPPORT][4] = {"ply", "vtp", "obj", "stl"};
-const char t8_unstructured_support[2][4] = {"vtu", "vtk"};
+const char          t8_poly_support[T8_POLY_SUPPORT][4] =
+  { "ply", "vtp", "obj", "stl" };
+const char          t8_unstructured_support[2][4] = { "vtu", "vtk" };
 
-
-t8_cmesh_t t8_read_from_vtk(const char* filename, int file_type, sc_MPI_Comm comm)
+t8_cmesh_t
+t8_read_from_vtk (const char *filename, int file_type, sc_MPI_Comm comm)
 {
-    if(file_type < T8_POLY_SUPPORT)
-    {
-        return t8_cmesh_read_from_vtk_poly(filename, 1, 0, comm);
-    }
-    else{
-        return t8_cmesh_read_from_vtk_unstructured(filename, 1, 0, comm);
-    }
+  if (file_type < T8_POLY_SUPPORT) {
+    return t8_cmesh_read_from_vtk_poly (filename, 1, 0, comm);
+  }
+  else {
+    return t8_cmesh_read_from_vtk_unstructured (filename, 1, 0, comm);
+  }
 }
 
 /* *INDENT-OFF* */
