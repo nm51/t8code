@@ -80,6 +80,13 @@ AC_CONFIG_LINKS([test/testfiles/test_msh_file_vers2_bin.msh:test/testfiles/test_
 AC_CONFIG_LINKS([test/testfiles/test_msh_file_vers4_ascii.msh:test/testfiles/test_msh_file_vers4_ascii.msh])
 AC_CONFIG_LINKS([test/testfiles/test_msh_file_vers4_bin.msh:test/testfiles/test_msh_file_vers4_bin.msh])
 
+AC_CONFIG_LINKS([test/testfiles/vtk_reader/simple_test.g:test/testfiles/vtk_reader/simple_test.g])
+AC_CONFIG_LINKS([test/testfiles/vtk_reader/simple_test.obj:test/testfiles/vtk_reader/simple_test.obj])
+AC_CONFIG_LINKS([test/testfiles/vtk_reader/simple_test.ply:test/testfiles/vtk_reader/simple_test.ply])
+AC_CONFIG_LINKS([test/testfiles/vtk_reader/simple_test.stl:test/testfiles/vtk_reader/simple_test.stl])
+AC_CONFIG_LINKS([test/testfiles/vtk_reader/simple_test.vtk:test/testfiles/vtk_reader/simple_test.vtk])
+AC_CONFIG_LINKS([test/testfiles/vtk_reader/simple_test.vtp:test/testfiles/vtk_reader/simple_test.vtp])
+AC_CONFIG_LINKS([test/testfiles/vtk_reader/simple_test.vtu:test/testfiles/vtk_reader/simple_test.vtu])
 # Print summary.
 
 AC_DEFINE_UNQUOTED(CPP,         ["${CPP}"],         [C preprocessor])
