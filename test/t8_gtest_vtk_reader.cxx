@@ -109,7 +109,7 @@ TEST_P(vtk_reader, compare_constructed)
         GTEST_SKIP();
     }
     else{
-        t8_cmesh_t          cmesh = t8_cmesh_new_hypercube_hybrid(sc_MPI_COMM_WORLD, 0, 0);
+        t8_cmesh_t          cmesh = t8_cmesh_new_hypercube_hybrid(sc_MPI_COMM_WORLD, 0, 0, 0);
         t8_cmesh_t          cmesh_from_reader;
         t8_locidx_t         num_trees;
         t8_locidx_t         itree;

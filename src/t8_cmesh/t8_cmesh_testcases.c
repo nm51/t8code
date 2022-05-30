@@ -470,7 +470,7 @@ t8_test_create_new_hypercube_hybrid_cmesh (int cmesh_id)
     ("Creating new hypercube hybrid cmesh. comm=%s , do_partition=%i, periodic=%i \n",
      t8_comm_string_list[comm_num], do_partition, periodic);
 
-  return t8_cmesh_new_hypercube_hybrid (comm, do_partition, periodic);
+  return t8_cmesh_new_hypercube_hybrid (comm, do_partition, periodic, 1);
 }
 
 /** The function t8_test_create_new_periodic_cmesh(int cmesh_id):  

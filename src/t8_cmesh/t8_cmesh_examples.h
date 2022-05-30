@@ -98,7 +98,8 @@ t8_cmesh_t          t8_cmesh_new_hypercube (t8_eclass_t eclass,
 /* TODO: Document */
 t8_cmesh_t          t8_cmesh_new_hypercube_hybrid (sc_MPI_Comm comm,
                                                    int do_partition,
-                                                   int periodic);
+                                                   int periodic,
+                                                   int build_face_connection);
 
 /** Construct a unit interval/square/cube coarse mesh that is periodic in each direction.
  * Element class?

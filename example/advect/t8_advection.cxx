@@ -1112,7 +1112,7 @@ t8_advect_create_cmesh (sc_MPI_Comm comm, int cube_type,
       return t8_cmesh_new_periodic_hybrid (comm);
     }
     else if (cube_type == 8) {
-      return t8_cmesh_new_hypercube_hybrid (comm, 0, 1);
+      return t8_cmesh_new_hypercube_hybrid (comm, 0, 1, 1);
     }
     else {
       T8_ASSERT (T8_ECLASS_ZERO <= cube_type && cube_type < T8_ECLASS_COUNT);
