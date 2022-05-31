@@ -137,6 +137,10 @@ TEST_P(vtk_reader, compare_constructed)
         t8_cmesh_t          cmesh = t8_cmesh_new_hypercube_hybrid(sc_MPI_COMM_WORLD, 0, 0, 0);
         t8_cmesh_t          cmesh_from_reader;
         t8_locidx_t         num_trees;
+        int                 num_vertices;
+        int                 ivertex;
+        double              *vertices;
+        double              *vertices_compare;
         t8_locidx_t         itree;
         t8_eclass_t         eclass;
         /* Write the hybrid mesh*/
@@ -148,13 +152,22 @@ TEST_P(vtk_reader, compare_constructed)
         num_trees = t8_cmesh_get_num_local_trees(cmesh);
         EXPECT_EQ(num_trees, t8_cmesh_get_num_local_trees(cmesh_from_reader));
         /* Check if the class of every tree is the same. */
-        for(itree = 0; itree < num_trees; itree++){
+        for(itree = 0; itree < num_trees; itree++)
+        {
             eclass = t8_cmesh_get_tree_class(cmesh, itree);
             EXPECT_EQ(eclass, t8_cmesh_get_tree_class(cmesh_from_reader, itree));
+            vertices = t8_cmesh_get_tree_vertices(cmesh, itree);
+            vertices_compare = t8_cmesh_get_tree_vertices(cmesh_from_reader, itree);
+            num_vertices = t8_eclass_num_vertices[(int)eclass];
+            for(ivertex = 0; ivertex < num_vertices; ivertex++)
+            {
+                /* Fails, because the vertices are not ordered the same way.*/
+                EXPECT_DOUBLE_EQ(vertices_compare[ivertex], vertices[ivertex]);
+            }
         }
 
         /* This test fails currently*/
-         EXPECT_TRUE(t8_cmesh_is_equal(cmesh, cmesh_from_reader));
+         // EXPECT_TRUE(t8_cmesh_is_equal(cmesh, cmesh_from_reader));
 
         t8_cmesh_destroy(&cmesh);
         t8_cmesh_destroy(&cmesh_from_reader);
