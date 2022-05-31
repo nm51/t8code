@@ -68,12 +68,16 @@ t8_read_from_vtk (const char *filename, int file_type, sc_MPI_Comm comm)
 /* Check if file exists. */
   SC_CHECK_ABORTF (access (filename, R_OK) == 0, "Could not open file %s\n",
                    filename);
+#if T8_WITH_VTK
   if (file_type < T8_POLY_SUPPORT) {
     return t8_cmesh_read_from_vtk_poly (filename, 1, 0, comm);
   }
   else {
     return t8_cmesh_read_from_vtk_unstructured (filename, 1, 0, comm);
   }
+#else
+  return NULL;
+#endif /* T8_WITH_VTK */
 }
 
 /* *INDENT-OFF* */
