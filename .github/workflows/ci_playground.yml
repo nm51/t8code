@@ -35,14 +35,14 @@ on:
 
 jobs:
   install_VTK:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: update apt-get
         run: sudo apt-get update
       - name: search VTK
         run: apt search libvtk
       - name: install VTK
-        run: sudo apt-get install libvtk7-dev
+        run: sudo apt-get install libvtk9-dev
 
 # test_vars:
 #   runs-on: ubuntu-latest
