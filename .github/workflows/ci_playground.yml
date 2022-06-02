@@ -37,8 +37,12 @@ jobs:
   install_VTK:
     runs-on: ubuntu-latest
     steps:
+      - name: update apt-get
+        run: sudo apt-get update
+      - name: search VTK
+        run: apt search libvtk
       - name: install VTK
-        run: sudo apt-get update && sudo apt-get install libvtk-dev
+        run: sudo apt-get install libvtk-dev
 
 # test_vars:
 #   runs-on: ubuntu-latest
