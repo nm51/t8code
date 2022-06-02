@@ -32,7 +32,14 @@ on:
 
   workflow_dispatch: # Be able to trigger this manually on github.com
 
+
 jobs:
+  install_VTK:
+    runs-on: ubuntu-latest
+    steps:
+      - name: install VTK
+        run: sudo apt-get update && sudo apt-get install libvtk-dev
+
   test_vars:
     runs-on: ubuntu-latest
     env:
