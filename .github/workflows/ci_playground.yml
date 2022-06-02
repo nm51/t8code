@@ -42,7 +42,7 @@ jobs:
       - name: search VTK
         run: apt search libvtk
       - name: install VTK
-        run: sudo apt-get install libvtk-dev
+        run: sudo apt-get install libvtk7-dev
 
 # test_vars:
 #   runs-on: ubuntu-latest
