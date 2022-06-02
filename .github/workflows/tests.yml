@@ -282,9 +282,9 @@ jobs:
             && echo "[$CONFIG_SERIAL_RELEASE]"
 # configure and test with MPI and VTK
     - name: Install VTK
-      run: sudo apt-get install libvtk7-dev
+      run: sudo apt-get install libvtk9-dev
     - name: configure
-      run: mkdir build_vtk && cd build_vtk && ../configure $CONFIG_RELEASE --with-vtk --with-vtk_version_number=7.1 CFLAGS="$CFLAGS_var" CXXFLAGS="$CXXFLAGS_var"
+      run: mkdir build_vtk && cd build_vtk && ../configure $CONFIG_RELEASE --with-vtk --with-vtk_version_number=9.1 CFLAGS="$CFLAGS_var" CXXFLAGS="$CXXFLAGS_var"
     - name: OnFailPrintLog
       if: failure()
       run: cat build_vtk/config.log
