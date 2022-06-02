@@ -280,6 +280,18 @@ jobs:
             && echo "[$CONFIG_SERIAL_DEBUG]"
             && echo "[$CONFIG_RELEASE]"
             && echo "[$CONFIG_SERIAL_RELEASE]"
+# configure and test with MPI and VTK
+    - name: Install VTK
+      run: sudo apt-get install libvtk7-dev
+    - name: configure
+      run: mkdir build_vtk && cd build_vtk && ../configure $CONFIG_RELEASE --with-vtk --with-vtk_version_number=7.1 CFLAGS="$CFLAGS_var" CXXFLAGS="$CXXFLAGS_var"
+    - name: OnFailPrintLog
+      if: failure()
+      run: cat build_vtk/config.log
+    - name: make
+      run: cd build_vtk && make -j V=0 CFLAGS="$CFLAGS_var -Werror" CXXFLAGS="$CXXFLAGS_var -Werror"
+    - name: make check
+      run: cd build_vtk && make check -j4 V=0 CFLAGS="$CFLAGS_var -Werror" CXXFLAGS="$CXXFLAGS_var -Werror"
 # configure and test with MPI (release mode)
     - name: Printing MPI compiler info
       run: mpicc --version && mpirun --version
