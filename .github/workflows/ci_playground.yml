@@ -39,7 +39,11 @@ jobs:
   do_vars_survive:
     runs-on: ubuntu-latest
     needs: test_workflow_calling
-    run: echo hi
+    steps:
+      - name: say hi 
+        run: echo hi
+      - name: print vars
+        run: echo "[$SC_DEBUG] [$P4EST_DEBUG]"
 
   test_vars:
     runs-on: ubuntu-latest
