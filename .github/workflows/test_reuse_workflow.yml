@@ -1,5 +1,7 @@
+name: test_workflow_reuse
+
 on:
-  workflow_call
+  workflow_call:
 
 jobs: 
   test_workflow_call:
