@@ -3,6 +3,11 @@ name: test_workflow_reuse
 on:
   workflow_call:
 
+  push:
+    branches:
+      - feature-*CI* # for testing this script, all feature branches with "CI" in their name
+
+
 jobs: 
   test_workflow_call:
     env:
