@@ -33,11 +33,6 @@ on:
   workflow_dispatch: # Be able to trigger this manually on github.com
 
 jobs:
-  test_workflow_calling:
-    runs-on: ubuntu-latest
-    uses: actions/checkout@v1
-    uses: ./.github/workflows/test_reuse_workflow.yml
-
   test_vars:
     runs-on: ubuntu-latest
     env:
