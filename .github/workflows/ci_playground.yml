@@ -36,6 +36,11 @@ jobs:
   test_workflow_calling:
     uses: ./.github/workflows/test_reuse_workflow.yml
 
+  do_vars_survive:
+    runs-on: ubuntu-latest
+    needs: test_workflow_calling
+    run: echo hi
+
   test_vars:
     runs-on: ubuntu-latest
     env:
