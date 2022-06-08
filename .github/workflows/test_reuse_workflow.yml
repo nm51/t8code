@@ -1,0 +1,12 @@
+on:
+  workflow_call
+
+jobs: 
+  test_workflow_call:
+    env:
+      SC_DEBUG: ../sc/build_debug
+      P4EST_DEBUG: ../p4est/build_debug
+    steps:
+      - name: Test vars
+        run: echo "[$SC_DEBUG] [$P4EST_DEBUG]"
+    

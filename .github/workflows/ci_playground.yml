@@ -33,6 +33,15 @@ on:
   workflow_dispatch: # Be able to trigger this manually on github.com
 
 jobs:
+  test_workflow_calling:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/workflows/test_reuse_workflow
+      - name: echo
+	run: echo Hi
+      - name: Test var
+	run: echo "[$SC_DEBUG] [$P4EST_DEBUG]"
+   
   test_vars:
     runs-on: ubuntu-latest
     env:
