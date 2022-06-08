@@ -37,7 +37,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - uses: ./.github/workflows/test_reuse_workflow.yml
+      - name: test wf calling
+        uses: ./.github/workflows/test_reuse_workflow.yml
    
   test_vars:
     runs-on: ubuntu-latest
