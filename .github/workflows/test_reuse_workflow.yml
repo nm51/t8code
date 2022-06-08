@@ -10,6 +10,7 @@ on:
 
 jobs: 
   test_workflow_call:
+    runs-on: ubuntu-latest
     env:
       SC_DEBUG: ../sc/build_debug
       P4EST_DEBUG: ../p4est/build_debug
