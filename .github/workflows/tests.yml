@@ -49,7 +49,7 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     
     timeout-minutes: 60
     steps:
@@ -282,9 +282,9 @@ jobs:
             && echo "[$CONFIG_SERIAL_RELEASE]"
 # configure and test with MPI and VTK
     - name: Install VTK
-      run: sudo apt-get install libvtk9-dev
+      run: sudo apt-get install libvtk7-dev
     - name: configure
-      run: mkdir build_vtk && cd build_vtk && ../configure $CONFIG_RELEASE --with-vtk --with-vtk_version_number=9.1 CFLAGS="$CFLAGS_var" CXXFLAGS="$CXXFLAGS_var -I/usr/include/vtk-9.1" LDFLAGS="-L/usr/lib/x86_64-linux-gnu"
+      run: mkdir build_vtk && cd build_vtk && ../configure $CONFIG_RELEASE --with-vtk --with-vtk_version_number=7.1 CFLAGS="$CFLAGS_var" CXXFLAGS="$CXXFLAGS_var -I/usr/include/vtk-7.1" LDFLAGS="-L/usr/lib/x86_64-linux-gnu"
     - name: OnFailPrintLog
       if: failure()
       run: cat build_vtk/config.log
