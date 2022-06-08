@@ -36,11 +36,8 @@ jobs:
   test_workflow_calling:
     runs-on: ubuntu-latest
     steps:
-      - uses: ./.github/workflows/test_reuse_workflow
-      - name: echo
-	run: echo Hi
-      - name: Test var
-	run: echo "[$SC_DEBUG] [$P4EST_DEBUG]"
+      - uses: actions/checkout@v1
+      - uses: ./.github/workflows/test_reuse_workflow.yml
    
   test_vars:
     runs-on: ubuntu-latest
