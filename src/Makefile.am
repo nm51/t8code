@@ -25,7 +25,8 @@ libt8_installed_headers = \
   src/t8_element_c_interface.h \
   src/t8_refcount.h src/t8_cmesh.h src/t8_cmesh_triangle.h \
   src/t8_cmesh_tetgen.h src/t8_cmesh_readmshfile.h \
-  src/t8_cmesh_vtk.h \
+  src/t8_cmesh_vtk_writer.h \
+  src/t8_cmesh_vtk_reader.hxx \
   src/t8_forest.h \
   src/t8_vec.h \
   src/t8_version.h \
@@ -67,8 +68,8 @@ libt8_internal_headers = \
   src/t8_cmesh/t8_cmesh_stash.h src/t8_cmesh/t8_cmesh_trees.h \
   src/t8_cmesh/t8_cmesh_types.h src/t8_cmesh/t8_cmesh_partition.h \
   src/t8_cmesh/t8_cmesh_refine.h src/t8_cmesh/t8_cmesh_copy.h \
-  src/t8_cmesh/t8_cmesh_offset.h \
-  src/t8_forest/t8_forest_cxx.h  \
+  src/t8_cmesh/t8_cmesh_offset.h src/t8_cmesh/t8_cmesh_reader_helper.hxx\
+  src/t8_cmesh/t8_cmesh_vtk_helper.hxx src/t8_forest/t8_forest_cxx.h  \
   src/t8_forest/t8_forest_ghost.h \
   src/t8_forest/t8_forest_balance.h src/t8_forest/t8_forest_types.h \
   src/t8_forest/t8_forest_private.h 
@@ -78,7 +79,8 @@ libt8_compiled_sources = \
   src/t8_element_c_interface.cxx \
   src/t8_refcount.c src/t8_cmesh/t8_cmesh.c \
   src/t8_cmesh/t8_cmesh_cxx.cxx src/t8_cmesh/t8_cmesh_triangle.c \
-  src/t8_cmesh/t8_cmesh_vtk.c src/t8_cmesh/t8_cmesh_stash.c \
+  src/t8_cmesh/t8_cmesh_vtk_writer.c src/t8_cmesh/t8_cmesh_vtk_reader.cxx \
+  src/t8_cmesh/t8_cmesh_stash.c \
   src/t8_cmesh/t8_cmesh_save.c \
   src/t8_cmesh/t8_cmesh_trees.c src/t8_cmesh/t8_cmesh_commit.c \
   src/t8_cmesh/t8_cmesh_partition.c src/t8_cmesh/t8_cmesh_refine.cxx \
@@ -86,6 +88,8 @@ libt8_compiled_sources = \
   src/t8_data/t8_locidx_list.c \
   src/t8_cmesh/t8_cmesh_geometry.cxx \
   src/t8_cmesh/t8_cmesh_examples.c \
+  src/t8_cmesh/t8_cmesh_reader_helper.cxx \
+  src/t8_cmesh/t8_cmesh_vtk_helper.cxx \
   src/t8_data/t8_containers.cxx \
   src/t8_cmesh/t8_cmesh_offset.c src/t8_cmesh/t8_cmesh_readmshfile.c \
   src/t8_forest/t8_forest.c src/t8_forest/t8_forest_adapt.cxx \

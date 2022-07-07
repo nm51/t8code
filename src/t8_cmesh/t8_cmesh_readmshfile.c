@@ -22,7 +22,8 @@
 
 #include <t8_eclass.h>
 #include <t8_cmesh_readmshfile.h>
-#include <t8_cmesh_vtk.h>
+#include <t8_cmesh/t8_cmesh_reader_helper.hxx>
+#include <t8_cmesh_vtk_writer.h>
 #include <t8_geometry/t8_geometry_implementations/t8_geometry_linear.h>
 #include "t8_cmesh_types.h"
 #include "t8_cmesh_stash.h"
@@ -475,55 +476,8 @@ t8_cmesh_msh_file_read_eles (t8_cmesh_t cmesh, FILE *fp,
       /* Detect and correct negative volumes */
       if (t8_cmesh_tree_vertices_negative_volume (eclass, tree_vertices,
                                                   num_nodes)) {
-        /* The volume described is negative. We need to change vertices.
-         * For tets we switch 0 and 3.
-         * For prisms we switch 0 and 3, 1 and 4, 2 and 5.
-         * For hexahedra we switch 0 and 4, 1 and 5, 2 and 6, 3 and 7.
-         * For pyramids we switch 0 and 4 */
-        double              temp;
-        int                 num_switches = 0;
-        int                 switch_indices[4] = { 0 };
-        int                 iswitch;
-        T8_ASSERT (t8_eclass_to_dimension[eclass] == 3);
-        t8_debugf ("Correcting negative volume of tree %li\n", tree_count);
-        switch (eclass) {
-        case T8_ECLASS_TET:
-          /* We switch vertex 0 and vertex 3 */
-          num_switches = 1;
-          switch_indices[0] = 3;
-          break;
-        case T8_ECLASS_PRISM:
-          num_switches = 3;
-          switch_indices[0] = 3;
-          switch_indices[1] = 4;
-          switch_indices[2] = 5;
-          break;
-        case T8_ECLASS_HEX:
-          num_switches = 4;
-          switch_indices[0] = 4;
-          switch_indices[1] = 5;
-          switch_indices[2] = 6;
-          switch_indices[3] = 7;
-          break;
-        case T8_ECLASS_PYRAMID:
-          num_switches = 1;
-          switch_indices[0] = 4;
-          break;
-        default:
-          SC_ABORT_NOT_REACHED ();
-        }
+        t8_cmesh_correct_volume (tree_vertices, eclass);
 
-        for (iswitch = 0; iswitch < num_switches; ++iswitch) {
-          /* We switch vertex 0 + iswitch and vertex switch_indices[iswitch] */
-          for (i = 0; i < 3; i++) {
-            temp = tree_vertices[3 * iswitch + i];
-            tree_vertices[3 * iswitch + i] =
-              tree_vertices[3 * switch_indices[iswitch] + i];
-            tree_vertices[3 * switch_indices[iswitch] + i] = temp;
-          }
-        }
-        T8_ASSERT (!t8_cmesh_tree_vertices_negative_volume
-                   (eclass, tree_vertices, num_nodes));
       }                         /* End of negative volume handling */
       /* Set the vertices of this tree */
       t8_cmesh_set_tree_vertices (cmesh, tree_count, tree_vertices,
@@ -552,17 +506,6 @@ die_ele:
   t8_cmesh_destroy (&cmesh);
   return -1;
 }
-
-/* This struct stores all information associated to a tree's face.
- * We need it to find neighbor trees.
- */
-typedef struct
-{
-  t8_locidx_t         ltree_id; /* The local id of the tree this face belongs to */
-  int8_t              face_number;      /* The number of that face whitin the tree */
-  int                 num_vertices;     /* The number of vertices of this face. */
-  long               *vertices; /* The indices of these vertices. */
-} t8_msh_file_face_t;
 
 /* Hash a face. The hash value is the sum of its vertex indices */
 static unsigned
@@ -644,65 +587,6 @@ t8_msh_file_face_set_boundary (void **face, const void *data)
   t8_cmesh_set_join (cmesh, gtree_id, gtree_id, Face->face_number,
                      Face->face_number, 0);
   return 1;
-}
-
-/* Given two faces and the classes of their volume trees,
- * compute the orientation of the faces to each other */
-static int
-t8_msh_file_face_orientation (t8_msh_file_face_t * Face_a,
-                              t8_msh_file_face_t * Face_b,
-                              t8_eclass_t tree_class_a,
-                              t8_eclass_t tree_class_b)
-{
-  long                vertex_zero;      /* The number of the first vertex of the smaller face */
-  t8_msh_file_face_t *smaller_Face, *bigger_Face;
-  int                 compare, iv;
-  t8_eclass_t         bigger_class;
-  int                 orientation = -1;
-
-  compare = t8_eclass_compare (tree_class_a, tree_class_b);
-  if (compare > 0) {
-    /* tree_class_a is bigger than tree_class_b */
-    smaller_Face = Face_b;
-    bigger_Face = Face_a;
-    bigger_class =
-      (t8_eclass_t) t8_eclass_face_types[tree_class_a][Face_a->face_number];
-  }
-  else if (compare < 0) {
-    /* tree_class_a is smaller than tree_class_b */
-    smaller_Face = Face_a;
-    bigger_Face = Face_b;
-    bigger_class =
-      (t8_eclass_t) t8_eclass_face_types[tree_class_b][Face_b->face_number];
-  }
-  else {
-    /* both classes are the same, thus
-     * the face with the smaller face id is the smaller one */
-    if (Face_a->face_number < Face_b->face_number) {
-      smaller_Face = Face_a;
-      bigger_Face = Face_b;
-      bigger_class =
-        (t8_eclass_t) t8_eclass_face_types[tree_class_b][Face_b->face_number];
-    }
-    else {
-      smaller_Face = Face_b;
-      bigger_Face = Face_a;
-      bigger_class =
-        (t8_eclass_t) t8_eclass_face_types[tree_class_a][Face_a->face_number];
-    }
-  }
-  vertex_zero = smaller_Face->vertices[0];
-  /* Find which point in the bigger face is vertex_zero */
-  for (iv = 0; iv < t8_eclass_num_vertices[bigger_class]; iv++) {
-    if (vertex_zero == bigger_Face->vertices[iv]) {
-      /* We found the corresponding vertex */
-      orientation = iv;
-      /* set condition to break the loop */
-      iv = t8_eclass_num_vertices[bigger_class];
-    }
-  }
-  T8_ASSERT (orientation >= 0);
-  return orientation;
 }
 
 /* Given the number of vertices and for each element a list of its
