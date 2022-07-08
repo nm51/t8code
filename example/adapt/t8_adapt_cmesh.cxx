@@ -32,15 +32,23 @@
 #include <t8_forest/t8_forest_partition.h>
 #include <t8_cmesh_readmshfile.h>
 #include <sc_statistics.h>
+#include <t8_cmesh_vtk_reader.hxx>
 
 /* Build a cmesh according to which a later forest shall be refined. */
 t8_forest_t
 t8_adapt_forest_init_adapt_geometry (sc_MPI_Comm comm, const char *meshfile,
-                                     const int dim, const int level)
+                                     const char *vtkfile, const int dim,
+                                     const int level)
 {
   t8_cmesh_t          cmesh;
-  if (meshfile != NULL) {
+  if (meshfile != NULL && vtkfile != NULL) {
+    SC_ABORTF ("meshfile and vtkfile provided.");
+  }
+  else if (meshfile != NULL && vtkfile == NULL) {
     cmesh = t8_cmesh_from_msh_file (meshfile, 0, sc_MPI_COMM_SELF, dim, 0);
+  }
+  else if (meshfile == NULL && vtkfile != NULL) {
+    cmesh = t8_cmesh_read_from_vtk_poly (vtkfile, 1, 0, sc_MPI_COMM_SELF);
   }
   else {
     //cmesh = t8_cmesh_new_from_class (T8_ECLASS_PRISM, sc_MPI_COMM_SELF);
@@ -760,6 +768,7 @@ main (int argc, char **argv)
   int                 dim;
   double              scale[3];
   double              displacement[3];
+  const char         *vtu_input_path = NULL;
   const char         *mshfile = NULL;
   const char         *mshfile_forest = NULL;
   const char         *vtu_prefix_path = NULL;
@@ -810,6 +819,10 @@ main (int argc, char **argv)
                          "the given prefix.\n\t\t\t\t     The files must end in .msh "
                          "and be in ASCII format version 2. -d must be specified.");
 
+  sc_options_add_string (opt, 'v', "vtk_input", &vtu_input_path, NULL,
+                         "If specified, the forest to adapt from is constructed from a file that is readable by vtk. "
+                         "\n\t\t\t\t     We support .ply, .vtp, .obj, .stl, .vtk, .g");
+
   sc_options_add_int (opt, 'd', "dim", &dim, -1,
                       "In combination with -f: The dimension of the coarse mesh to read. 1 <= d <= 3.");
 
@@ -850,8 +863,9 @@ main (int argc, char **argv)
   }
   else if (parsed >= 0 && level >= 0 && template_level >= 0 && reflevel >= 0 && ((dim >= 1 && dim <= 3) || mshfile == NULL)     /* If dim is provided, then mshfile must be provided as well. */
            &&scale[0] != 0 && scale[1] != 0 && scale[2] != 0) {
+
     t8_forest_t         forest_to_adapt_from =
-      t8_adapt_forest_init_adapt_geometry (comm, mshfile, dim,
+      t8_adapt_forest_init_adapt_geometry (comm, mshfile, vtu_input_path, dim,
                                            template_level);
     t8_forest_t         forest =
       t8_adapt_cmesh_init_forest (comm, level, scale, displacement,
