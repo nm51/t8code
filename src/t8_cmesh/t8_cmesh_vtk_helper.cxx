@@ -126,10 +126,10 @@ vtkSmartPointer < vtkPolyData > t8_read_poly (const char *filename)
   }
 }
 
-t8_cmesh_t
+void
 t8_vtk_iterate_cells (vtkSmartPointer < vtkDataSet > cells,
                       vtkSmartPointer < vtkCellData > cell_data,
-                      sc_MPI_Comm comm)
+                      sc_MPI_Comm comm, t8_cmesh_t *cmesh)
 {
   vtkCellIterator    *cell_it;
   vtkSmartPointer < vtkPoints > points;
@@ -141,12 +141,10 @@ t8_vtk_iterate_cells (vtkSmartPointer < vtkDataSet > cells,
   size_t             *data_size;
   t8_gloidx_t         tree_id = 0;
   int                 max_dim = -1;
-  t8_cmesh_t          cmesh;
   int                 max_cell_points = -1;
 
   max_cell_points = cells->GetMaxCellSize ();
   T8_ASSERT (max_cell_points > 0);
-  t8_cmesh_init (&cmesh);
   vertices = T8_ALLOC (double, 3 * max_cell_points);
   /*Get cell iterator */
   cell_it = cells->NewCellIterator ();
@@ -176,7 +174,7 @@ t8_vtk_iterate_cells (vtkSmartPointer < vtkDataSet > cells,
     cell_type = t8_cmesh_vtk_type_to_t8_type[cell_it->GetCellType ()];
     SC_CHECK_ABORTF (t8_eclass_is_valid ((t8_eclass_t) cell_type),
                      "vtk-cell-type %i not supported by t8code\n", cell_type);
-    t8_cmesh_set_tree_class (cmesh, tree_id, (t8_eclass_t) cell_type);
+    t8_cmesh_set_tree_class (*cmesh, tree_id, (t8_eclass_t) cell_type);
     /*Get the points of the cell */
     num_points = cell_it->GetNumberOfPoints ();
     T8_ASSERT (num_points > 0);
@@ -189,15 +187,15 @@ t8_vtk_iterate_cells (vtkSmartPointer < vtkDataSet > cells,
         ((t8_eclass_t) cell_type, vertices, num_points)) {
       t8_cmesh_correct_volume (vertices, (t8_eclass_t) cell_type);
     }
-    t8_cmesh_set_tree_vertices (cmesh, tree_id, vertices, num_points);
+    t8_cmesh_set_tree_vertices (*cmesh, tree_id, vertices, num_points);
 
     /*Get and set the data of each cell */
     for (int dtype = 0; dtype < num_data_arrays; dtype++) {
       cell_id = cell_it->GetCellId ();
       vtkDataArray       *data = cell_data->GetArray (dtype);
       data->GetTuple (cell_id, tuples[dtype]);
-      t8_cmesh_set_attribute (cmesh, cell_id, t8_get_package_id (), dtype + 1,
-                              tuples[dtype], data_size[dtype], 0);
+      t8_cmesh_set_attribute (*cmesh, cell_id, t8_get_package_id (),
+                              dtype + 1, tuples[dtype], data_size[dtype], 0);
     }
     /*Check geometry-dimension */
     if (max_dim < cell_it->GetCellDimension ()) {
@@ -208,8 +206,7 @@ t8_vtk_iterate_cells (vtkSmartPointer < vtkDataSet > cells,
   t8_debugf ("[D] read %li trees\n", tree_id++);
   /*Set the geometry */
   t8_geometry_c      *linear_geom = t8_geometry_linear_new (max_dim);
-  t8_cmesh_register_geometry (cmesh, linear_geom);
-  t8_cmesh_commit (cmesh, comm);
+  t8_cmesh_register_geometry (*cmesh, linear_geom);
 
   /*Clean-up */
   cell_it->Delete ();
@@ -221,7 +218,6 @@ t8_vtk_iterate_cells (vtkSmartPointer < vtkDataSet > cells,
     T8_FREE (tuples);
   }
   T8_FREE (vertices);
-  return cmesh;
 }
 
 #endif

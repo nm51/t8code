@@ -72,10 +72,11 @@ const t8_eclass_t   t8_cmesh_vtk_type_to_t8_type[82] = {
  * \param [in]      comm              The communicator to use
  * \return t8_cmesh_t                 The cmesh constructed using the \a cells.
  */
-t8_cmesh_t          t8_vtk_iterate_cells (vtkSmartPointer < vtkDataSet >
+void                t8_vtk_iterate_cells (vtkSmartPointer < vtkDataSet >
                                           cells,
                                           vtkSmartPointer < vtkCellData >
-                                          cell_data, sc_MPI_Comm comm);
+                                          cell_data, sc_MPI_Comm comm,
+                                          t8_cmesh_t *cmesh);
 
 /**
  * Read the Poly-data of a file containing vtkPolyData

@@ -49,6 +49,8 @@ t8_cmesh_read_from_vtk_unstructured (const char *filename,
                                      sc_MPI_Comm comm)
 {
 #if T8_WITH_VTK
+  t8_cmesh_t          cmesh;
+  t8_cmesh_init (&cmesh);
   /*The Incoming data must be an unstructured Grid */
   vtkSmartPointer < vtkUnstructuredGrid > unstructuredGrid;
   vtkSmartPointer < vtkCellData > cellData;
@@ -59,7 +61,9 @@ t8_cmesh_read_from_vtk_unstructured (const char *filename,
   cellData = unstructuredGrid->GetCellData ();
 
   /*Actual translation */
-  return t8_vtk_iterate_cells (unstructuredGrid, cellData, comm);
+  t8_vtk_iterate_cells (unstructuredGrid, cellData, comm, &cmesh);
+  t8_cmesh_commit (cmesh, comm);
+  return cmesh;
 
 #else
   /*Return empty cmesh if not linked against vtk */
@@ -80,6 +84,9 @@ t8_cmesh_read_from_vtk_poly (const char *filename, const int num_files,
   vtkSmartPointer < vtkPolyData > triangulated;
   vtkNew < vtkTriangleFilter > tri_filter;
 
+  t8_cmesh_t          cmesh;
+  t8_cmesh_init (&cmesh);
+
   /* Prepare the poly-data for the translation from vtk to t8code.
    * We split all polygons (which are not supported by t8code) to
    * triangles, vertices and lines. */
@@ -94,7 +101,9 @@ t8_cmesh_read_from_vtk_poly (const char *filename, const int num_files,
 
   cell_data = triangulated->GetCellData ();
 
-  return t8_vtk_iterate_cells (triangulated, cell_data, comm);
+  t8_vtk_iterate_cells (triangulated, cell_data, comm, &cmesh);
+  t8_cmesh_commit (cmesh, comm);
+  return cmesh;
 #else
   t8_global_errorf
     ("WARNING: t8code is not linked against the vtk library. Without proper linking t8code cannot use the vtk-reader\n");
