@@ -34,6 +34,7 @@ along with t8code; if not, write to the Free Software Foundation, Inc.,
 #include <vtkUnstructuredGrid.h>
 #include <vtkUnstructuredGridReader.h>
 #include <vtkXMLUnstructuredGridReader.h>
+#include <vtkXMLPUnstructuredGridReader.h>
 #include <vtkPolyData.h>
 #include <vtkBYUReader.h>
 #include <vtkOBJReader.h>
@@ -68,8 +69,19 @@ t8_read_unstructured (const char *filename)
     reader->Update ();
     return reader->GetOutput ();
   }
+  else if (strcmp (extension, "pvtu") == 0) {
+    vtkSmartPointer < vtkXMLPUnstructuredGridReader > reader =
+      vtkSmartPointer < vtkXMLPUnstructuredGridReader >::New ();
+    reader->SetFileName (filename);
+    reader->Update ();
+    vtkIndent           indent;
+    reader->PrintSelf (std::cout, indent);
+    /*Todo: Write Warning that a parall file is opened using the serial reader.
+     * Each process will read the complete data.*/
+    return reader->GetOutput ();
+  }
   else {
-    t8_global_errorf ("Please use .vtk or .vtu file\n");
+    t8_global_errorf ("Please use .vtk, .vtu or .pvtu file\n");
     return NULL;
   }
 }
@@ -126,7 +138,7 @@ vtkSmartPointer < vtkPolyData > t8_read_poly (const char *filename)
   }
 }
 
-void
+t8_gloidx_t
 t8_vtk_iterate_cells (vtkSmartPointer < vtkDataSet > cells,
                       vtkSmartPointer < vtkCellData > cell_data,
                       sc_MPI_Comm comm, t8_cmesh_t *cmesh)
@@ -165,11 +177,9 @@ t8_vtk_iterate_cells (vtkSmartPointer < vtkDataSet > cells,
       tuples[i] = T8_ALLOC (double, tuple_size);
     }
   }
-
   /*Iterate over all cells */
   for (cell_it->InitTraversal (); !cell_it->IsDoneWithTraversal ();
        cell_it->GoToNextCell ()) {
-
     /*Set the t8_eclass of the cell */
     cell_type = t8_cmesh_vtk_type_to_t8_type[cell_it->GetCellType ()];
     SC_CHECK_ABORTF (t8_eclass_is_valid ((t8_eclass_t) cell_type),
@@ -203,7 +213,7 @@ t8_vtk_iterate_cells (vtkSmartPointer < vtkDataSet > cells,
     }
     tree_id++;
   }
-  t8_debugf ("[D] read %li trees\n", tree_id++);
+  t8_debugf ("[D] read %li trees\n", tree_id);
   /*Set the geometry */
   t8_geometry_c      *linear_geom = t8_geometry_linear_new (max_dim);
   t8_cmesh_register_geometry (*cmesh, linear_geom);
@@ -218,6 +228,7 @@ t8_vtk_iterate_cells (vtkSmartPointer < vtkDataSet > cells,
     T8_FREE (tuples);
   }
   T8_FREE (vertices);
+  return tree_id;
 }
 
 #endif

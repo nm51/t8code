@@ -72,7 +72,7 @@ const t8_eclass_t   t8_cmesh_vtk_type_to_t8_type[82] = {
  * \param [in]      comm              The communicator to use
  * \return t8_cmesh_t                 The cmesh constructed using the \a cells.
  */
-void                t8_vtk_iterate_cells (vtkSmartPointer < vtkDataSet >
+t8_gloidx_t         t8_vtk_iterate_cells (vtkSmartPointer < vtkDataSet >
                                           cells,
                                           vtkSmartPointer < vtkCellData >
                                           cell_data, sc_MPI_Comm comm,
