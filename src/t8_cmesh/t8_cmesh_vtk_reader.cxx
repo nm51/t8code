@@ -57,19 +57,20 @@ t8_cmesh_parallel_read_from_vtk_unstructured (const char *filename,
   int                 mpiret;
   int                 mpisize;
   int                 mpirank;
-  int                 main_proc = 0;    /*TODO: Should be an argument */
   t8_gloidx_t         local_num_trees;
-  t8_gloidx_t         global_num_trees;
+  t8_gloidx_t         read_trees;
   t8_gloidx_t         first_tree = 0;
   t8_gloidx_t         last_tree;
-  int                 rank_it;
+  /* Init shared memory to set tree_offsets via shared_mem_array. */
   t8_shmem_init (comm);
+  /* Setup the pvtu Reader. */
   p_reader->SetFileName (filename);
   p_reader->UpdateInformation ();
   mpiret = sc_MPI_Comm_size (comm, &mpisize);
   SC_CHECK_MPI (mpiret);
   mpiret = sc_MPI_Comm_rank (comm, &mpirank);
   SC_CHECK_MPI (mpiret);
+  /*Tell the reader to read a chunk of the vtu files given by the pvtu file. */
   vtkInformation     *Info = p_reader->GetOutputInformation (0);
   Info->Set (vtkStreamingDemandDrivenPipeline::UPDATE_PIECE_NUMBER (),
              mpirank);
@@ -77,31 +78,41 @@ t8_cmesh_parallel_read_from_vtk_unstructured (const char *filename,
              mpisize);
   p_reader->Update ();
 
+  /* Get grid and cell-data of the current chunk. */
   unstructuredGrid = p_reader->GetOutput ();
   cellData = unstructuredGrid->GetCellData ();
+
+  /* Start constructing cmesh */
   t8_cmesh_init (&cmesh);
-  local_num_trees =
-    (t8_gloidx_t) t8_vtk_iterate_cells (unstructuredGrid, cellData, comm,
-                                        &cmesh);
+  /* Compute the tree-offsets of the partitioned cmesh. */
+  /* Get the number of cells of the local chunk. */
+  local_num_trees = unstructuredGrid->GetNumberOfCells ();
+  /* Allocate shared memory for the tree_offsets */
   t8_shmem_array_t    tree_offsets = t8_cmesh_alloc_offsets (mpisize, comm);
 
-  //t8_shmem_array_allgather(&local_num_trees, 1, T8_MPI_GLOIDX, tree_offsets, 1, T8_MPI_GLOIDX);
-
+  /* Compute the offsets. */
   t8_shmem_array_prefix (&local_num_trees, tree_offsets, 1, T8_MPI_GLOIDX,
                          sc_MPI_SUM, comm);
 
-  for (rank_it = 0; rank_it <= mpisize; rank_it++) {
-    t8_debugf ("[D] %i, offset: %li\n", rank_it,
-               t8_shmem_array_get_gloidx (tree_offsets, rank_it));
-  }
+  /* Set the global id of the first and last tree of the local chunk. */
   first_tree = t8_shmem_array_get_gloidx (tree_offsets, mpirank);
-  last_tree = first_tree + local_num_trees;
+  last_tree = first_tree + local_num_trees - 1;
 
   t8_debugf ("[D] first_tree: %li, last_tree: %li\n", first_tree, last_tree);
 
+  /* Set partition. */
+  /* TODO: Use t8_cmesh_set_partition_offsets as soon as is it possible to call
+   * the function with non-derived cmeshes. */
   t8_cmesh_set_partition_range (cmesh, 3, first_tree, last_tree);
 
+  read_trees =
+    (t8_gloidx_t) t8_vtk_iterate_cells (unstructuredGrid, cellData, comm,
+                                        cmesh);
+  T8_ASSERT (read_trees == local_num_trees);
+
   t8_cmesh_commit (cmesh, comm);
+  t8_shmem_array_destroy (&tree_offsets);
+  t8_shmem_finalize (comm);
   return cmesh;
 
 #else
@@ -132,7 +143,7 @@ t8_cmesh_read_from_vtk_unstructured (const char *filename,
   cellData = unstructuredGrid->GetCellData ();
 
   /*Actual translation */
-  t8_vtk_iterate_cells (unstructuredGrid, cellData, comm, &cmesh);
+  t8_vtk_iterate_cells (unstructuredGrid, cellData, comm, cmesh);
   t8_cmesh_commit (cmesh, comm);
   return cmesh;
 
@@ -172,7 +183,7 @@ t8_cmesh_read_from_vtk_poly (const char *filename, const int num_files,
 
   cell_data = triangulated->GetCellData ();
 
-  t8_vtk_iterate_cells (triangulated, cell_data, comm, &cmesh);
+  t8_vtk_iterate_cells (triangulated, cell_data, comm, cmesh);
   t8_cmesh_commit (cmesh, comm);
   return cmesh;
 #else

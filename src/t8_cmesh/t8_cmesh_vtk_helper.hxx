@@ -76,7 +76,7 @@ t8_gloidx_t         t8_vtk_iterate_cells (vtkSmartPointer < vtkDataSet >
                                           cells,
                                           vtkSmartPointer < vtkCellData >
                                           cell_data, sc_MPI_Comm comm,
-                                          t8_cmesh_t *cmesh);
+                                          t8_cmesh_t cmesh);
 
 /**
  * Read the Poly-data of a file containing vtkPolyData

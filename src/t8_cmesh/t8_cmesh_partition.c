@@ -194,6 +194,8 @@ t8_cmesh_gather_trees_per_eclass (t8_cmesh_t cmesh, sc_MPI_Comm comm)
     for (ieclass = 0; ieclass < T8_ECLASS_COUNT; ieclass++) {
       num_trees += cmesh->num_trees_per_eclass[ieclass];
     }
+    t8_debugf ("[D] num_trees: %li, c_num_trees: %li\n", num_trees,
+               cmesh->num_trees);
     T8_ASSERT (num_trees == cmesh->num_trees);
   }
 #endif
