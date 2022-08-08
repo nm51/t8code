@@ -36,6 +36,12 @@ along with t8code; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 T8_EXTERN_C_BEGIN ();
+
+t8_cmesh_t          t8_cmesh_parallel_read_from_vtk_unstructured (const char
+                                                                  *filename,
+                                                                  sc_MPI_Comm
+                                                                  comm);
+
 /**
  * Construct a cmesh given a filename and a number of files (for parallel reader).
  * The \a filename should point to file containing an unstructured Grid.

@@ -26,6 +26,7 @@ along with t8code; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include <t8_cmesh.h>
+#include <t8_data/t8_shmem.h>
 #include <t8_cmesh_vtk_writer.h>
 #include <t8_cmesh_vtk_reader.hxx>
 #include <t8_cmesh/t8_cmesh_examples.h>
@@ -38,8 +39,78 @@ along with t8code; if not, write to the Free Software Foundation, Inc.,
 #include <vtkCellData.h>
 #include <vtkPolyData.h>
 #include <vtkTriangleFilter.h>
+#include <vtkXMLPUnstructuredGridReader.h>
+#include <vtkStreamingDemandDrivenPipeline.h>
+#include <vtkInformation.h>
 #endif
 T8_EXTERN_C_BEGIN ();
+
+t8_cmesh_t
+t8_cmesh_parallel_read_from_vtk_unstructured (const char *filename,
+                                              sc_MPI_Comm comm)
+{
+#if T8_WITH_VTK
+  t8_cmesh_t          cmesh;
+  vtkSmartPointer < vtkUnstructuredGrid > unstructuredGrid;
+  vtkSmartPointer < vtkCellData > cellData;
+  vtkNew < vtkXMLPUnstructuredGridReader > p_reader;
+  int                 mpiret;
+  int                 mpisize;
+  int                 mpirank;
+  int                 main_proc = 0;    /*TODO: Should be an argument */
+  t8_gloidx_t         local_num_trees;
+  t8_gloidx_t         global_num_trees;
+  t8_gloidx_t         first_tree = 0;
+  t8_gloidx_t         last_tree;
+  int                 rank_it;
+  t8_shmem_init (comm);
+  p_reader->SetFileName (filename);
+  p_reader->UpdateInformation ();
+  mpiret = sc_MPI_Comm_size (comm, &mpisize);
+  SC_CHECK_MPI (mpiret);
+  mpiret = sc_MPI_Comm_rank (comm, &mpirank);
+  SC_CHECK_MPI (mpiret);
+  vtkInformation     *Info = p_reader->GetOutputInformation (0);
+  Info->Set (vtkStreamingDemandDrivenPipeline::UPDATE_PIECE_NUMBER (),
+             mpirank);
+  Info->Set (vtkStreamingDemandDrivenPipeline::UPDATE_NUMBER_OF_PIECES (),
+             mpisize);
+  p_reader->Update ();
+
+  unstructuredGrid = p_reader->GetOutput ();
+  cellData = unstructuredGrid->GetCellData ();
+  t8_cmesh_init (&cmesh);
+  local_num_trees =
+    (t8_gloidx_t) t8_vtk_iterate_cells (unstructuredGrid, cellData, comm,
+                                        &cmesh);
+  t8_shmem_array_t    tree_offsets = t8_cmesh_alloc_offsets (mpisize, comm);
+
+  //t8_shmem_array_allgather(&local_num_trees, 1, T8_MPI_GLOIDX, tree_offsets, 1, T8_MPI_GLOIDX);
+
+  t8_shmem_array_prefix (&local_num_trees, tree_offsets, 1, T8_MPI_GLOIDX,
+                         sc_MPI_SUM, comm);
+
+  for (rank_it = 0; rank_it <= mpisize; rank_it++) {
+    t8_debugf ("[D] %i, offset: %li\n", rank_it,
+               t8_shmem_array_get_gloidx (tree_offsets, rank_it));
+  }
+  first_tree = t8_shmem_array_get_gloidx (tree_offsets, mpirank);
+  last_tree = first_tree + local_num_trees;
+
+  t8_debugf ("[D] first_tree: %li, last_tree: %li\n", first_tree, last_tree);
+
+  t8_cmesh_set_partition_range (cmesh, 3, first_tree, last_tree);
+
+  t8_cmesh_commit (cmesh, comm);
+  return cmesh;
+
+#else
+  /*Return empty cmesh if not linked against vtk */
+  t8_global_errorf
+    ("WARNING: t8code is not linked against the vtk library. Without proper linking t8code cannot use the vtk-reader\n");
+  return t8_cmesh_new_empty (comm, 0, 0);
+#endif
+}
 
 /*Construct a cmesh given a filename and a*/
 t8_cmesh_t

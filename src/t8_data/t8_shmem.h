@@ -165,9 +165,10 @@ void                t8_shmem_array_allgather (const void *sendbuf,
  * \param[in] op              the operation to prefix (e.g., sc_MPI_SUM)
  * \param[in] comm            the mpi communicator
  */
-void                  t8_shmem_array_prefix(void *sendbuf, t8_shmem_array_t recvarray,
-                                     int count, sc_MPI_Datatype type,
-                                     sc_MPI_Op op, sc_MPI_Comm comm);
+void                t8_shmem_array_prefix (void *sendbuf,
+                                           t8_shmem_array_t recvarray,
+                                           int count, sc_MPI_Datatype type,
+                                           sc_MPI_Op op, sc_MPI_Comm comm);
 
 /** Return the MPI communicator associated with a shmem array.
  * \param [in]          array The shmem_array to be queried.
