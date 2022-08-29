@@ -55,9 +55,6 @@ t8_cmesh_t          t8_cmesh_parallel_read_from_vtk_unstructured (const char
  * \return t8_cmesh_t       The cmesh described by the files
  */
 t8_cmesh_t          t8_cmesh_read_from_vtk_unstructured (const char *filename,
-                                                         const int num_files,
-                                                         const int
-                                                         compute_face_neigh,
                                                          sc_MPI_Comm comm);
 
 /**
@@ -73,8 +70,6 @@ t8_cmesh_t          t8_cmesh_read_from_vtk_unstructured (const char *filename,
  * \return t8_cmesh_t       The cmesh described by the files
  */
 t8_cmesh_t          t8_cmesh_read_from_vtk_poly (const char *filename,
-                                                 const int num_files,
-                                                 const int compute_face_neigh,
                                                  sc_MPI_Comm comm);
 
 T8_EXTERN_C_END ();
