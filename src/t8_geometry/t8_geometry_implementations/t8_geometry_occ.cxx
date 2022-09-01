@@ -73,10 +73,15 @@ t8_geometry_occ::t8_geometry_occ (int dim, const char *fileprefix,
   BRep_Builder        builder;
   std::string current_file (fileprefix);
   std::ifstream is (current_file + ".brep");
+  if (!is.is_open ()) {
+    SC_ABORTF ("Error opening file %s.brep", fileprefix);
+  }
   BRepTools::Read (occ_shape, is, builder);
   is.close ();
   if (occ_shape.IsNull ()) {
-    SC_ABORTF ("Could not read brep file or brep file contains no shape \n");
+    SC_ABORTF
+      ("Shape in %s.brep has an OpenCASCADE version mismatch or is empty. \n",
+       fileprefix);
   }
   TopExp::MapShapes (occ_shape, TopAbs_VERTEX, occ_shape_vertex_map);
   TopExp::MapShapes (occ_shape, TopAbs_EDGE, occ_shape_edge_map);
