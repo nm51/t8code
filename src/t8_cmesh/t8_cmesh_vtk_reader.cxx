@@ -43,6 +43,7 @@ along with t8code; if not, write to the Free Software Foundation, Inc.,
 #include <vtkStreamingDemandDrivenPipeline.h>
 #include <vtkInformation.h>
 #endif
+
 T8_EXTERN_C_BEGIN ();
 
 t8_cmesh_t
@@ -119,11 +120,11 @@ t8_cmesh_parallel_read_from_vtk_unstructured (const char *filename,
   /*Return empty cmesh if not linked against vtk */
   t8_global_errorf
     ("WARNING: t8code is not linked against the vtk library. Without proper linking t8code cannot use the vtk-reader\n");
-  return t8_cmesh_new_empty (comm, 0, 0);
+  return NULL;
 #endif
 }
 
-/*Construct a cmesh given a filename and a*/
+/* Construct a cmesh given a filename a communicator */
 t8_cmesh_t
 t8_cmesh_read_from_vtk_unstructured (const char *filename, sc_MPI_Comm comm)
 {
@@ -133,7 +134,7 @@ t8_cmesh_read_from_vtk_unstructured (const char *filename, sc_MPI_Comm comm)
   /*The Incoming data must be an unstructured Grid */
   vtkSmartPointer < vtkUnstructuredGrid > unstructuredGrid;
   vtkSmartPointer < vtkCellData > cellData;
-  /*Prepare grid for translation */
+  /* Prepare grid for translation */
   unstructuredGrid = t8_read_unstructured (filename);
 
   /* Get the Data of the all cells */
@@ -143,12 +144,11 @@ t8_cmesh_read_from_vtk_unstructured (const char *filename, sc_MPI_Comm comm)
   t8_vtk_iterate_cells (unstructuredGrid, cellData, comm, cmesh);
   t8_cmesh_commit (cmesh, comm);
   return cmesh;
-
 #else
-  /*Return empty cmesh if not linked against vtk */
+  /* Return NULL if not linked against vtk */
   t8_global_errorf
     ("WARNING: t8code is not linked against the vtk library. Without proper linking t8code cannot use the vtk-reader\n");
-  return t8_cmesh_new_empty (comm, 0, 0);
+  return NULL;
 #endif
 }
 
@@ -170,9 +170,9 @@ t8_cmesh_read_from_vtk_poly (const char *filename, sc_MPI_Comm comm)
    * triangles, vertices and lines. */
   poly_data = t8_read_poly (filename);
   tri_filter->SetInputData (poly_data);
-  /*PolyVertex to vertex */
+  /* PolyVertex to vertex */
   tri_filter->PassVertsOn ();
-  /*PolyLines to lines */
+  /* PolyLines to lines */
   tri_filter->PassLinesOn ();
   tri_filter->Update ();
   triangulated = tri_filter->GetOutput ();
@@ -185,7 +185,7 @@ t8_cmesh_read_from_vtk_poly (const char *filename, sc_MPI_Comm comm)
 #else
   t8_global_errorf
     ("WARNING: t8code is not linked against the vtk library. Without proper linking t8code cannot use the vtk-reader\n");
-  return t8_cmesh_new_empty (comm, 0, 0);
+  return NULL;
 #endif
 }
 

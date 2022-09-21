@@ -37,37 +37,40 @@ along with t8code; if not, write to the Free Software Foundation, Inc.,
 
 T8_EXTERN_C_BEGIN ();
 
+/**
+ * Construct a cmesh that is partitioned given a filename pointing to a pvtu-file.
+ * \warning This is in production and this header will probably change. Update as the function progresses
+ * 
+ * \param[in] filename      The name of the  pvtu- file 
+ * \param[in] comm          The communicator used  
+ * \return t8_cmesh_t       The cmesh or NULL, if t8code is not linked against vtk.
+ */
 t8_cmesh_t          t8_cmesh_parallel_read_from_vtk_unstructured (const char
                                                                   *filename,
                                                                   sc_MPI_Comm
                                                                   comm);
-
 /**
- * Construct a cmesh given a filename and a number of files (for parallel reader).
+ * Construct a cmesh given a filename.
  * The \a filename should point to file containing an unstructured Grid.
- * CAREFULL: This is in production and this header will probably change! Update
+ * \warning: This is in production and this header will probably change! Update
  * as the function progresses
  * 
  * \param[in] filename      The name of the file 
- * \param[in] num_files     Number of files to read from
- * \param[in] compute_face_neigh  if non-zero, the neighbors along the faces of each cell will be used to store the topology of in the cmesh.
  * \param[in] comm          The communicator used 
- * \return t8_cmesh_t       The cmesh described by the files
+ * \return t8_cmesh_t       The cmesh described by the files or NULL, if t8code is not linked against vtk
  */
 t8_cmesh_t          t8_cmesh_read_from_vtk_unstructured (const char *filename,
                                                          sc_MPI_Comm comm);
 
 /**
- * Construct a cmesh given a filename and a number of files (for parallel reader).
+ * Construct a cmesh given a filename.
  * The \a filename should point to file containing vtkPolyData.
- * CAREFULL: This is in production and this header will probably change! Update
+ * \warning: This is in production and this header will probably change! Update
  * as the function progresses
  * 
  * \param[in] filename      The name of the file 
- * \param[in] num_files     Number of files to read from
- * \param[in] compute_face_neigh  if non-zero, the neighbors along the faces of each cell will be used to store the topology of in the cmesh.
  * \param[in] comm          The communicator used 
- * \return t8_cmesh_t       The cmesh described by the files
+ * \return t8_cmesh_t       The cmesh described by the files or NULL, if t8code is not linked against vtk
  */
 t8_cmesh_t          t8_cmesh_read_from_vtk_poly (const char *filename,
                                                  sc_MPI_Comm comm);
