@@ -1,4 +1,4 @@
-/*
+/* 
 This file is part of t8code.
 t8code is a C library to manage a collection (a forest) of multiple
 connected adaptive space-trees of general element classes in parallel.
@@ -53,18 +53,29 @@ t8_cmesh_t          t8_cmesh_parallel_read_from_vtk_unstructured (const char
  * Construct a cmesh given a filename.
  * The \a filename should point to file containing an unstructured Grid.
  * \warning: This is in production and this header will probably change! Update
- * as the function progresses
+ * as the function progresses.
+ * Supported filetypes are:
+ * -.vtu
+ * -.vtk
  * 
  * \param[in] filename      The name of the file 
  * \param[in] comm          The communicator used 
- * \return t8_cmesh_t       The cmesh described by the files or NULL, if t8code is not linked against vtk
+ * \return t8_cmesh_t       The cmesh described by the files or NULL if the cmesh could not be read.
  */
 t8_cmesh_t          t8_cmesh_read_from_vtk_unstructured (const char *filename,
                                                          sc_MPI_Comm comm);
 
 /**
  * Construct a cmesh given a filename.
- * The \a filename should point to file containing vtkPolyData.
+ * The \a filename should point to file containing vtkPolyData. As polyData can consist of
+ * polyhedra, the vtkTriangleFilter is used to break the cells down into triangles.
+ * Supported filetypes are:
+ * -.ply
+ * -.vtp
+ * -.obj
+ * -.stl
+ * -.vtk
+ * -.g
  * \warning: This is in production and this header will probably change! Update
  * as the function progresses
  * 

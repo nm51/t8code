@@ -1,4 +1,4 @@
-/*
+/* 
 This file is part of t8code.
 t8code is a C library to manage a collection (a forest) of multiple
 connected adaptive space-trees of general element classes in parallel.
@@ -20,46 +20,25 @@ along with t8code; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-/** \This file provides header for functions that can help with vtk-reader 
+/** \This file provides declarations for functions that can help with the cmesh vtk reader 
 */
 
 #ifndef T8_CMESH_VTK_HELPER
 #define T8_CMESH_VTK_HELPER
 
 #if T8_WITH_VTK
-#include<vtkSmartPointer.h>
+#include <vtkSmartPointer.h>
 #include <vtkPolyData.h>
 #include <vtkUnstructuredGrid.h>
 #include <vtkCellData.h>
 #include <vtkDataSet.h>
 
-/* look_up Table to transform vtkCellType into T8_ECLASS
-   T8_ECLASS_INVALID, if a the vtkCellType is not supported by t8code.
-   see https://vtk.org/doc/nightly/html/vtkCellType_8h.html to check.*/
-const t8_eclass_t   t8_cmesh_vtk_type_to_t8_type[82] = {
-  T8_ECLASS_INVALID, T8_ECLASS_VERTEX, T8_ECLASS_INVALID, T8_ECLASS_LINE,
-  T8_ECLASS_INVALID, T8_ECLASS_TRIANGLE, T8_ECLASS_INVALID,
-  T8_ECLASS_INVALID, T8_ECLASS_QUAD, T8_ECLASS_QUAD, T8_ECLASS_TET,
-  T8_ECLASS_HEX, T8_ECLASS_HEX, T8_ECLASS_PRISM, T8_ECLASS_PYRAMID,
-  T8_ECLASS_INVALID,
-  T8_ECLASS_INVALID, T8_ECLASS_INVALID, T8_ECLASS_INVALID, T8_ECLASS_INVALID,
-  T8_ECLASS_INVALID, T8_ECLASS_INVALID, T8_ECLASS_INVALID, T8_ECLASS_INVALID,
-  T8_ECLASS_INVALID, T8_ECLASS_INVALID, T8_ECLASS_INVALID, T8_ECLASS_INVALID,
-  T8_ECLASS_INVALID, T8_ECLASS_INVALID, T8_ECLASS_INVALID, T8_ECLASS_INVALID,
-  T8_ECLASS_INVALID, T8_ECLASS_INVALID, T8_ECLASS_INVALID, T8_ECLASS_INVALID,
-  T8_ECLASS_INVALID, T8_ECLASS_INVALID, T8_ECLASS_INVALID, T8_ECLASS_INVALID,
-  T8_ECLASS_INVALID, T8_ECLASS_INVALID, T8_ECLASS_INVALID, T8_ECLASS_INVALID,
-  T8_ECLASS_INVALID, T8_ECLASS_INVALID, T8_ECLASS_INVALID, T8_ECLASS_INVALID,
-  T8_ECLASS_INVALID, T8_ECLASS_INVALID, T8_ECLASS_INVALID, T8_ECLASS_INVALID,
-  T8_ECLASS_INVALID, T8_ECLASS_INVALID, T8_ECLASS_INVALID, T8_ECLASS_INVALID,
-  T8_ECLASS_INVALID, T8_ECLASS_INVALID, T8_ECLASS_INVALID, T8_ECLASS_INVALID,
-  T8_ECLASS_INVALID, T8_ECLASS_INVALID, T8_ECLASS_INVALID, T8_ECLASS_INVALID,
-  T8_ECLASS_INVALID, T8_ECLASS_INVALID, T8_ECLASS_INVALID, T8_ECLASS_INVALID,
-  T8_ECLASS_INVALID, T8_ECLASS_INVALID, T8_ECLASS_INVALID, T8_ECLASS_INVALID,
-  T8_ECLASS_INVALID, T8_ECLASS_INVALID, T8_ECLASS_INVALID, T8_ECLASS_INVALID,
-  T8_ECLASS_INVALID, T8_ECLASS_INVALID, T8_ECLASS_INVALID, T8_ECLASS_INVALID,
-  T8_ECLASS_INVALID, T8_ECLASS_INVALID
-};
+/** 
+ * look_up Table to transform vtkCellType into T8_ECLASS, T8_ECLASS_INVALID, 
+ * if a the vtkCellType is not supported by t8code. It is the inverse to
+ * t8_eclass_vtk_type.
+ * see https://vtk.org/doc/nightly/html/vtkCellType_8h.html to check.*/
+extern const t8_eclass_t t8_cmesh_vtk_type_to_t8_type[82];
 
 /** iterate over a vtkDataSet via a Celliterator and construct a tree
  * for every cell. All trees are then commited in a cmesh. For each cell
@@ -79,16 +58,18 @@ t8_gloidx_t         t8_vtk_iterate_cells (vtkSmartPointer < vtkDataSet >
                                           t8_cmesh_t cmesh);
 
 /**
- * Read the Poly-data of a file containing vtkPolyData
+ * Read the Poly-data of a file containing vtkPolyData.
  * \param [in]      filename            The file containing the Data
- * \returns         vtkSmartPointer<vtkPolyData>    A pointer to vtkPolyData
+ * \returns         vtkSmartPointer<vtkPolyData>    A pointer to vtkPolyData,
+ *                  or NULL if an error occurs during reading.
  */
 vtkSmartPointer < vtkPolyData > t8_read_poly (const char *filename);
 
 /**
  * Read the unstructured grid of a file containing vtkPolyData
- * \param [in]      filename            The file containing the Data
- * \returns         vtkSmartPointer<vtkUnstructuredGrid>    A pointer to vtkPolyData
+ * \param [in]      filename            The file containing the Data,
+ * \returns         vtkSmartPointer<vtkUnstructuredGrid>    A pointer to vtkPolyData,
+ *                  or NULL if an error occurs during reading.
  */
 vtkSmartPointer < vtkUnstructuredGrid >
 t8_read_unstructured (const char *filename);
